@@ -19,6 +19,7 @@ class BridgeServer:
         app.router.add_post("/v1/pair/request", self.pair_request)
         app.router.add_post("/v1/pair/claim", self.pair_claim)
         app.router.add_post("/v1/chat", self.chat)
+        app.router.add_post("/v1/device/command", self.next_device_command)
         app.router.add_post("/v1/command/result", self.command_result)
         self.runner = web.AppRunner(app)
         await self.runner.setup()
@@ -54,6 +55,20 @@ class BridgeServer:
         async for chunk in events: await response.write(chunk)
         await response.write_eof()
         return response
+
+    async def next_device_command(self, request):
+        try:
+            payload = await self.payload(request)
+            command = await self.adapter.next_device_command(
+                str(payload.get("device_id", "")),
+                str(payload.get("credential", "")),
+                int(payload.get("wait_seconds", 25)),
+            )
+        except BridgeProtocolError as exc:
+            return self.error(str(exc), exc.status_code)
+        except (TypeError, ValueError):
+            return self.error("wait_seconds 无效", 400)
+        return self.json({"protocol_version": 1, **command})
 
     async def command_result(self, request):
         try:

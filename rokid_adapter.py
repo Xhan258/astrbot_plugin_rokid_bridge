@@ -27,6 +27,11 @@ class RokidPlatformAdapter(Platform):
         super().__init__(config, event_queue)
         self._requests: dict[str, asyncio.Queue[dict]] = {}
         self._request_devices: dict[str, str] = {}
+        # Device commands deliberately use a channel independent of an active
+        # chat SSE response. Starting the system camera can suspend or close a
+        # chat response on some AIUI hosts; that must not cancel a photo/HUD
+        # command which has already reached the glasses.
+        self._device_commands: dict[str, asyncio.Queue[dict]] = {}
         self._command_waiters: dict[str, tuple[str, asyncio.Future]] = {}
         self._metadata = PlatformMetadata("rokid_bridge", "Rokid Glasses Bridge", str(config.get("id") or "rokid_bridge_internal"), support_streaming_message=True)
 
@@ -42,6 +47,7 @@ class RokidPlatformAdapter(Platform):
             queue.put_nowait({"type": "error", "code": "adapter_stopped"})
         self._requests.clear()
         self._request_devices.clear()
+        self._device_commands.clear()
         for _, future in self._command_waiters.values():
             if not future.done():
                 future.set_exception(BridgeProtocolError(503, "Bridge 已停止"))
@@ -82,20 +88,44 @@ class RokidPlatformAdapter(Platform):
             await queue.put({"type": "done"})
 
     async def request_device_command(self, request_id: str, command: str, payload: dict, timeout_seconds: int = 45) -> dict:
-        """Deliver a command through an active chat stream and await its result."""
-        queue = self._requests.get(request_id)
-        if queue is None:
+        """Queue a command for the authenticated glasses and await its result."""
+        device_id = self._request_devices.get(request_id)
+        if device_id is None:
             raise BridgeProtocolError(409, "眼镜当前未连接，无法执行设备操作")
         command_id = uuid.uuid4().hex
         future = asyncio.get_running_loop().create_future()
-        self._command_waiters[command_id] = (request_id, future)
-        await queue.put({"type": "command", "command_id": command_id, "command": command, "payload": payload})
+        self._command_waiters[command_id] = (device_id, future)
+        queue = self._device_commands.setdefault(device_id, asyncio.Queue())
+        await queue.put({"command_id": command_id, "command": command, "payload": payload})
         try:
             return await asyncio.wait_for(future, timeout=max(5, min(timeout_seconds, 120)))
         except TimeoutError as exc:
             raise BridgeProtocolError(504, "眼镜设备操作超时") from exc
         finally:
             self._command_waiters.pop(command_id, None)
+
+    async def next_device_command(
+        self,
+        device_id: str,
+        credential: str,
+        wait_seconds: int = 25,
+    ) -> dict:
+        """Long-poll one command for a paired device.
+
+        This endpoint is intentionally separate from ``/v1/chat``.  A client
+        may keep polling it before, during and after a chat response, so an
+        AIUI system-camera transition cannot tear down the command waiter.
+        """
+        device = await get_registry().authenticate(device_id, credential)
+        if device is None:
+            raise BridgeProtocolError(401, "设备未授权")
+        queue = self._device_commands.setdefault(device.device_id, asyncio.Queue())
+        timeout = max(1, min(int(wait_seconds), 30))
+        try:
+            command = await asyncio.wait_for(queue.get(), timeout=timeout)
+        except TimeoutError:
+            return {"status": "pending"}
+        return {"status": "command", **command}
 
     async def submit_command_result(self, device_id: str, credential: str, command_id: str, result: dict) -> None:
         device = await get_registry().authenticate(device_id, credential)
@@ -104,8 +134,8 @@ class RokidPlatformAdapter(Platform):
         waiter = self._command_waiters.get(command_id)
         if waiter is None:
             raise BridgeProtocolError(404, "设备命令不存在或已过期")
-        request_id, future = waiter
-        if self._request_devices.get(request_id) != device.device_id:
+        owner_device_id, future = waiter
+        if owner_device_id != device.device_id:
             raise BridgeProtocolError(403, "设备无权提交此命令结果")
         if not future.done():
             future.set_result(result)
@@ -138,9 +168,6 @@ class RokidPlatformAdapter(Platform):
         finally:
             self._requests.pop(request_id, None)
             self._request_devices.pop(request_id, None)
-            for _, (owner_request_id, future) in list(self._command_waiters.items()):
-                if owner_request_id == request_id and not future.done():
-                    future.set_exception(BridgeProtocolError(409, "眼镜连接已关闭"))
 
     @staticmethod
     def _sse(event: str, data: dict) -> bytes:
