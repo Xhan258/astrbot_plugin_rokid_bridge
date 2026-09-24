@@ -1,0 +1,18 @@
+name: astrbot_plugin_rokid_bridge
+display_name: Rokid 眼镜桥接
+short_desc: 将兼容 AIUI 客户端安全接入 AstrBot 的通用平台适配器。
+desc: |
+  为 Rokid Glasses AIUI 客户端提供六位码配对、设备凭证、SSE 流式回复、HUD 显示和拍照识图工具。
+  插件不提供独立 Agent；眼镜消息会进入用户现有的 AstrBot 会话链路。
+version: 0.3.0
+author: Xhan258
+repo: https://github.com/Xhan258/astrbot_plugin_rokid_bridge
+astrbot_version: ">=4.27,<5"
+tags:
+  - rokid
+  - aiui
+  - 平台适配器
+  - 智能眼镜
+pages:
+  - name: rokid-bridge
+    title: Rokid 设备

@@ -1,0 +1,48 @@
+# Changelog
+
+## 0.3.0
+
+- 将 AIUI 客户端源码纳入仓库的 `aiui-client/`，可直接从 GitHub 或本地导入 AIUI Studio。
+- 提供可编辑的客户端配置：Bridge 地址、HUD 顶部名称、设备显示名、TTS 开关与声音。
+- 清除特定 Agent、私有 IP 与旧功能范围描述；保留旧 `alis_*` 本地存储键的迁移兼容。
+- 更新 AstrBot 市场元数据、安装说明与发布文件结构。
+
+## 0.2.2
+
+- 移除设备管理按钮对浏览器确认弹窗的依赖，兼容 AstrBot 受限插件页面 iframe。
+- 管理员、撤销操作点击后立即提交，并在页面显示明确进行中/成功/失败状态。
+
+## 0.2.1
+
+- 修复设备认证与管理员设置并发时可能覆盖管理员标记的问题。
+- 设备页新增可编辑的使用者名称；该名称会作为眼镜消息的 AstrBot 昵称。
+- 重做设备管理页布局，并为管理员状态与改名操作增加明确反馈和日志。
+
+## 0.2.0
+
+- 新增仅限当前管理员眼镜会话的 `rokid_show_text` HUD 文本显示工具。
+- 新增 `rokid_take_photo`：眼镜按需拍照，插件以当前会话的视觉模型识图后把文字结果交回 Agent。
+- 增加受认证保护的设备命令通道；照片上传上限为 8 MiB，命令结果不能跨设备提交。
+
+## 0.1.4
+
+- 将 AstrBot 思考期间的 SSE 保活间隔从 15 秒缩短到 3 秒，兼容约 5 秒空闲即断开的嵌入式客户端。
+
+## 0.1.3
+
+- 修复确认配对成功后异步事件对象失效，导致页面无法重置配对码输入框的问题。
+
+## 0.1.2
+
+- 修复 Rokid 设备管理页在 AstrBot 受限 iframe 内直接请求 API 导致的 `Failed to fetch`。
+- 改用 AstrBot 官方 Plugin Page bridge 管理已绑定设备、确认配对与撤销凭证。
+
+## 0.1.1
+
+- Remove the user-visible AstrBot platform-instance setup.
+- Start the AIUI HTTP/SSE endpoint from the plugin itself on the configured port.
+- Keep the internal AstrBot adapter solely for normal event and session routing.
+
+## 0.1.0
+
+- Initial development package with pairing, credential hashing, SSE routing and device management.

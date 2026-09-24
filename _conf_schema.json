@@ -1,0 +1,34 @@
+{
+  "listen_host": {
+    "description": "Bridge 监听地址",
+    "type": "string",
+    "default": "0.0.0.0"
+  },
+  "listen_port": {
+    "description": "Bridge 监听端口",
+    "type": "int",
+    "default": 6191,
+    "hint": "眼镜通过此端口连接。插件不会自动开放公网。"
+  },
+  "allow_pairing": {
+    "description": "允许新设备申请配对",
+    "type": "bool",
+    "default": true
+  },
+  "pairing_ttl_seconds": {
+    "description": "配对码有效期（秒）",
+    "type": "int",
+    "default": 300
+  },
+  "request_timeout_seconds": {
+    "description": "眼镜聊天请求最大等待时间（秒）",
+    "type": "int",
+    "default": 120
+  },
+  "segment_close_delay_milliseconds": {
+    "description": "普通分段回复结束等待（毫秒）",
+    "type": "int",
+    "default": 3000,
+    "hint": "QQ/微信式多段回复在这段空闲时间后才结束，避免眼镜只收到第一段。"
+  }
+}

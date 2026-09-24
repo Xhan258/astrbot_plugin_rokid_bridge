@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rokid 设备</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main>
+      <header class="page-header">
+        <p class="eyebrow">ROKID · ASTRBOT</p>
+        <h1>眼镜设备</h1>
+        <p class="hint">在眼镜中看到六码后，在此确认。设备凭证不会显示在此页面。</p>
+      </header>
+      <section class="panel pairing-panel" aria-labelledby="pairing-heading">
+        <div>
+          <h2 id="pairing-heading">连接新设备</h2>
+          <p>输入眼镜显示的六码，完成一次性授权。</p>
+        </div>
+        <form id="pairing-form">
+          <label class="sr-only" for="pairing-code">配对码</label>
+          <input id="pairing-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="482731" required>
+          <button class="primary" type="submit">确认配对</button>
+        </form>
+      </section>
+      <p id="notice" role="status" aria-live="polite"></p>
+      <section class="devices-section">
+        <div class="section-title"><div><p class="eyebrow">DEVICES</p><h2>已绑定设备</h2></div><button id="reload" class="quiet" type="button">刷新</button></div>
+        <ul id="devices"><li>正在读取…</li></ul>
+      </section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
