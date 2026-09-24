@@ -59,17 +59,11 @@ data: {}
 
 ## 设备命令扩展
 
-设备命令通过独立长轮询端点接收，避免系统相机或页面生命周期中断聊天 SSE。客户端在已配对且 AIUI 页面运行时，持续请求：
-
-`POST {server_url}/v1/device/command`
-
-请求体包含 `protocol_version`、`device_id`、`credential` 与可选的 `wait_seconds`（1 至 30）。无命令时返回 `{ "status": "pending" }`；有命令时返回 `{ "status": "command", "command_id": "...", "command": "...", "payload": {...} }`。
-
-客户端必须携带原设备的认证信息与 `command_id`，回传至：
+同一条活跃聊天 SSE 流可包含 `command` 事件。客户端必须携带原设备的认证信息与 `command_id`，回传至：
 
 `POST {server_url}/v1/command/result`
 
 - `show_text`：载荷包含 `text` 和 `duration_seconds`；客户端显示后以 JSON 确认。
-- `take_photo`：载荷包含请求的 `mode`；客户端以无系统预览的直拍模式拍一张照片、停止相机轨道，再用 multipart 字段 `image` 回传。
+- `take_photo`：载荷包含请求的 `mode`；客户端拍一张照片、停止相机轨道，再用 multipart 字段 `image` 回传。
 
 命令只在发起它的聊天流仍活跃时有效。Bridge 会拒绝其他设备提交的结果、过期的命令 ID、非图片上传和超过 8 MiB 的图片。
