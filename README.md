@@ -1,61 +1,304 @@
 # AstrBot Rokid Bridge
 
-将 Rokid Glasses 的 AIUI 客户端接入现有 AstrBot 的通用插件。它不是第二个机器人，也不创建第二套人格、记忆或模型：眼镜消息会进入你已有的 AstrBot 会话链路。
+让 Rokid 眼镜连接到 AstrBot。
 
-当前版本：`0.3.1`
+完成安装后，你可以通过眼镜和 AstrBot 对话，在 AIUI 页面阅读回复或听取播报；Agent 还可以在当前 AIUI 页面显示短提示，或请求眼镜拍照并交给视觉模型识别。
 
-## 已提供
+本插件需要配合 AIUI 眼镜客户端使用：
 
-- 六位码配对、每设备凭证及撤销。
-- 语音输入到 AstrBot，SSE 流式文字显示与对话历史。
-- AIUI 本地 TTS（可关闭）。
-- 仅限管理员眼镜会话调用的 HUD 文本显示、拍照识图工具。
-- 插件页中的设备列表、管理员权限和眼镜使用者名称编辑。
-- 配套 AIUI 客户端位于 [`rokid_aiui_astrbot_client`](https://github.com/Xhan258/rokid_aiui_astrbot_client)，可从灵珠 AIUI Studio 直接 GitHub 导入。
+- AIUI 客户端仓库：[rokid_aiui_astrbot_client](https://github.com/Xhan258/rokid_aiui_astrbot_client)
+- AIUI Studio 网页端：[https://aiui.rokid.com/](https://aiui.rokid.com/)
 
-## 安装插件
+当前版本：`0.3.2`
 
-1. 在 AstrBot 的插件页安装本仓库的 Release ZIP，或从源码安装 `astrbot_plugin_rokid_bridge/`。
-2. 在插件配置中确认 Bridge 监听地址与端口。默认端口为 `6191`。
-3. 确认眼镜能够访问该地址；局域网部署通常填写 AstrBot 主机的局域网 IP。公网部署请自行配置 HTTPS 入口或安全隧道。
-4. 在插件的 `Rokid 设备` 页面，输入眼镜显示的六码并确认配对。
-5. 若要让眼镜会话使用拍照/HUD 工具，把该设备设为管理员，并确保当前模型支持 Function Calling；拍照识图还需要视觉能力。
+## 你会得到什么
 
-插件只管理 Bridge。AIUI 的语音、TTS、相机权限均在客户端资源包里声明；不需要新建 AstrBot 机器人或平台实例。
+- 六位配对码绑定眼镜和 AstrBot。
+- 眼镜语音输入、文字回复显示、对话历史浏览和本地 TTS 播报。
+- 支持分段回复逐段显示。
+- 在 AstrBot 页面管理已绑定眼镜、管理员权限和使用者名称。
+- Agent 可在当前 AIUI 对话页显示短文本。
+- Agent 可请求眼镜拍照，再由当前视觉模型识图。
 
-## 配套 AIUI 客户端
+## 使用前准备
 
-请从 [`rokid_aiui_astrbot_client`](https://github.com/Xhan258/rokid_aiui_astrbot_client) 导入客户端。该仓库根目录就是 AIUI 项目根目录；用户在其中的 `config.js` 配置 Bridge 地址、HUD 名称、设备名称和 TTS。
+你需要：
 
-启动口令/启动提示词在 AIUI Studio 的智能体配置中设置，例如“乐奇，打开我的助手”；它不是系统唤醒词，也不属于 AstrBot 插件配置。
+1. 一套可以正常使用的 AstrBot。
+2. 支持 AIUI 的 Rokid 眼镜，以及 Rokid AI App。
+3. 能登录 AIUI Studio 的 Rokid 账号。
+4. 眼镜能够访问 AstrBot 所在主机的网络地址。
 
-## 管理员与身份
+局域网使用时，眼镜和 AstrBot 主机通常接入同一个局域网即可。
 
-插件页的“设为管理员”决定该**眼镜设备**进入 AstrBot 时的事件角色：管理员设备为 `admin`，普通设备为 `member`。这不会创建机器人，也不会修改 QQ、Telegram 等其他平台账号的权限。
+## 第一次安装
 
-“使用者名称”会作为此眼镜消息的 AstrBot 昵称，因此可填写自己的称呼；内部 `device_id` 与配对凭证不变。
+### 1. 安装插件
 
-## 眼镜工具
+1. 在本仓库的 Release 页面下载最新 ZIP。
+2. 打开 AstrBot WebUI，进入“插件”。
+3. 上传 ZIP、安装并启用插件。
+4. 打开插件卡片，可以看到插件配置和“Rokid 设备”页面。
 
-仅当前已连接的管理员眼镜会话可调用：
+### 2. 选择眼镜连接端口
 
-- `rokid_show_text(text, duration_seconds=8)`：在 HUD 顶部暂时显示短文本。
-- `rokid_take_photo(purpose)`：请求眼镜拍照，将图片交给当前会话的视觉模型识别。
+默认端口是：
 
-照片通过已认证的请求上传，服务端限制为 8 MiB。工具不会让 QQ 等其他平台远程控制眼镜。
+```text
+6191
+```
 
-## 分段回复
+在插件配置中可以修改“眼镜连接端口（可自定义）”。例如改成：
 
-`普通分段回复结束等待（毫秒）` 默认 `3000`。QQ/微信式回复在该时间内有新的分段，就会继续合并；空闲达到该时间后才向眼镜发送完成事件。若你的分段间隔更长，可在插件配置中调大。
+```text
+7000
+```
+
+改端口时，下面三处必须一致：
+
+| 位置 | 要填写什么 |
+| --- | --- |
+| AstrBot 插件配置 | 例如 `7000` |
+| AIUI 客户端 `serverUrl` | 例如 `http://192.168.1.100:7000` |
+| Docker 端口映射（如使用 Docker） | 例如 `7000:7000` |
+
+保存端口设置后，请在 AstrBot 插件页面重载插件。
+
+如果 AstrBot 通过 Docker 部署，除了修改插件配置，还要在 compose 文件中映射相同端口。例如使用默认端口：
+
+```yaml
+ports:
+  - "6191:6191"
+```
+
+端口改为 `7000` 后：
+
+```yaml
+ports:
+  - "7000:7000"
+```
+
+修改 Docker 端口映射后，需要重新创建容器，单纯重启容器不会读取新的映射。
+
+### 3. 导入 AIUI 客户端
+
+AIUI Studio 是 Rokid 的网页端 AIUI 开发和构建平台：
+
+<https://aiui.rokid.com/>
+
+在 AIUI Studio 中选择“GitHub 导入”，填写：
+
+```text
+仓库：https://github.com/Xhan258/rokid_aiui_astrbot_client
+分支：main
+```
+
+客户端仓库根目录就是完整 AIUI 工程，不需要填写子目录。
+
+### 4. 修改眼镜连接地址和页面名称
+
+导入后，在 AIUI Studio 的“代码”页签打开根目录 `config.js`。
+
+```js
+export const config = {
+  serverUrl: 'http://YOUR_ASTRBOT_HOST:6191',
+  assistantName: 'ASTRBOT',
+  deviceDisplayName: 'Rokid Glasses',
+  storagePrefix: 'astrbot_rokid_bridge',
+  ttsEnabled: true,
+  ttsVoice: 'female-yujie',
+};
+```
+
+每一项的作用：
+
+| 配置项 | 作用 | 应该怎样填写 |
+| --- | --- | --- |
+| `serverUrl` | 眼镜连接 AstrBot 的地址 | 必填。填写 `http://主机IP:端口`，例如 `http://192.168.1.100:6191`。端口必须与插件配置一致。不要填写 AstrBot WebUI 地址。 |
+| `assistantName` | AIUI 对话页面 HUD 顶部显示的名称 | 例如 `ALIS`。它只改变页面内标题，不改变 AstrBot 人格、AIUI 智能体名称或使用者昵称。 |
+| `deviceDisplayName` | 第一次配对时 AstrBot 设备页看到的默认设备名称 | 例如 `我的 Rokid`。已经配对的设备可在 AstrBot“Rokid 设备”页修改使用者名称。 |
+| `storagePrefix` | 眼镜本地保存设备 ID、配对凭证和 HUD 历史的前缀 | 普通用户保持默认。修改它会让客户端按一套新的本地信息运行，通常需要重新配对。 |
+| `ttsEnabled` | 是否播报回复 | `true` 为播报；`false` 为只显示文字。 |
+| `ttsVoice` | AIUI 本地 TTS 声音名称 | 默认 `female-yujie` 已测试。除非确认自己的 AIUI 环境支持其他名称，否则保持默认。 |
+
+改完 `config.js` 后，保存项目并重新构建 AIUI 资源包，再更新到眼镜。
+
+### 5. 设置眼镜如何打开这个智能体
+
+在 AIUI Studio 中创建或编辑智能体时，填写智能体名称。
+
+例如名称填写：
+
+```text
+Alis
+```
+
+安装到眼镜后，说：
+
+```text
+乐奇，打开 Alis
+```
+
+其中“乐奇”是眼镜系统唤醒词，“Alis”是 AIUI Studio 中的智能体名称。
+
+`assistantName`、AIUI 智能体名称和 AstrBot 使用者名称是三项不同设置：
+
+| 想改什么 | 去哪里改 |
+| --- | --- |
+| 说“乐奇，打开什么”时的名称 | AIUI Studio 的智能体名称 |
+| AIUI 对话页顶部显示什么 | `config.js` 的 `assistantName` |
+| AstrBot 如何称呼佩戴眼镜的人 | AstrBot 插件“Rokid 设备”页的使用者名称 |
+
+### 6. 构建并更新到眼镜
+
+在 AIUI Studio 中构建 AIX 资源包。然后在 Rokid AI App 中进入：
+
+```text
+设置 → 开发者 → 更新眼镜资源包
+```
+
+看到资源包更新成功后，使用“乐奇，打开 Alis”进入客户端。
+
+## 第一次配对
+
+1. 在眼镜中打开 AIUI 客户端。
+2. 眼镜显示六位配对码。
+3. 打开 AstrBot 插件的“Rokid 设备”页面。
+4. 输入眼镜显示的六码，点击“确认配对”。
+5. 眼镜显示 `READY` 后即可开始对话。
+
+默认情况下，配对码有效期是 5 分钟。
+
+## 日常使用
+
+当眼镜顶部显示：
+
+```text
+● READY
+```
+
+表示可以说话。
+
+1. 轻触一次镜腿，开始语音识别。
+2. 说出问题。
+3. 再轻触一次镜腿，结束语音识别。
+4. 回复显示在当前 AIUI 对话页面中。
+
+镜腿上下滑动可以浏览历史对话。退出后再次进入，客户端会自动尝试回到最新一条记录。
+
+### 分段回复如何显示
+
+AstrBot 有时会把一条回复分成多段发送。眼镜会在当前回复中逐段追加内容。
+
+最后一段到达后，插件会等待“普通分段回复结束等待”指定的时间；如果等待期间又收到了新分段，就继续追加并重新计时。
+
+默认是 `3000` 毫秒，也就是 3 秒。若回复仍然只显示前半段，可把插件配置中的该值改为 `5000`，然后重载插件。
+
+## 重装插件后重新配对
+
+删除、重装插件，或清除插件数据后，服务器端原有的眼镜凭证会失效。但眼镜本地可能还保存旧凭证，因此重新进入时可能先显示 `READY`。
+
+按以下步骤恢复：
+
+1. 返回眼镜主界面。
+2. 再通过“乐奇，打开 Alis”进入客户端。
+3. 如果眼镜直接显示六码，正常确认配对。
+4. 如果仍显示 `READY`，说一句能够识别成文字的话，例如“重新配对”。
+5. 客户端发现旧凭证失效后，会自动显示新的六码。
+6. 在 AstrBot“Rokid 设备”页面确认新六码。
+
+没有识别到文字的空语音不会发送到 AstrBot，因此不会触发重新配对。
+
+## 管理眼镜与使用者名称
+
+在 AstrBot 插件的“Rokid 设备”页面，可以：
+
+| 操作 | 作用 |
+| --- | --- |
+| 刷新 | 读取最新设备状态 |
+| 设为管理员 | 允许这副眼镜调用页面提示和拍照工具 |
+| 撤销管理员 | 保留聊天功能，关闭眼镜工具调用权限 |
+| 修改使用者名称 | 修改 AstrBot 收到眼镜消息时看到的昵称 |
+| 撤销 | 删除该设备凭证，之后需要重新配对 |
+
+例如把使用者名称改为 `Xhan258` 后，AstrBot 收到的眼镜消息会使用 `Xhan258` 作为昵称。
+
+## Agent 如何使用眼镜
+
+使用下列能力前，需要把眼镜设为管理员。
+
+### 在 AIUI 对话页显示短文本
+
+Agent 可调用：
+
+```text
+rokid_show_text(text, duration_seconds=8)
+```
+
+文字会显示在**已经打开的 AIUI 对话页面内部**，位于对话区域上方。
+
+它适合显示“拍照中”“服务器正常”“你有一封重要邮件”这类当前对话提示。它不会在退出 AIUI 页面后作为系统级通知弹出，也不会覆盖其他眼镜应用。
+
+默认显示 8 秒，最长可设置为 30 秒。
+
+### 拍照识图
+
+Agent 可调用：
+
+```text
+rokid_take_photo(purpose)
+```
+
+拍照时，AIUI 客户端需要获得眼镜相机权限。如果拍照失败，请在眼镜或 Rokid AI App 的权限设置中允许该 AIUI 智能体使用相机，重新进入 AIUI 页面后再试。
+
+拍照识图还需要：
+
+1. 眼镜已经设为管理员。
+2. 眼镜当前停留在 AIUI 对话页面并保持连接。
+3. 当前模型支持工具调用。
+4. 当前模型支持图片识别。
+
+## 常见问题
+
+### 眼镜没有显示配对码
+
+依次检查：
+
+1. `config.js` 的 `serverUrl` 是否正确。
+2. 插件是否启用。
+3. 插件端口、`serverUrl` 端口、Docker 映射端口是否一致。
+4. 插件配置中的“允许新设备申请配对”是否开启。
+5. 如果眼镜显示 `READY`，请执行“重装插件后重新配对”。
+
+### 眼镜显示连接错误
+
+重点检查：
+
+```js
+serverUrl: 'http://主机IP:端口',
+```
+
+常见原因包括填写了 AstrBot WebUI 地址、端口没有同步、Docker 未映射端口，或服务器 IP 已改变。
+
+### Agent 不能显示文字或拍照
+
+确认眼镜已经设为管理员，且用户正停留在 AIUI 对话页面。拍照还需要相机权限、支持工具调用的模型和支持图片识别的模型。
 
 ## 二次开发
 
-- Bridge 协议在 [`docs/protocol.md`](docs/protocol.md)。不要无故改变既有 `/v1/*` 字段。
-- AIUI 客户端边界与约束写在配套客户端仓库的 `AGENTS.md`。
-- 插件数据只写入运行时 `data/`，不提交设备信息、凭证、IP、令牌或个人身份。
+普通用户可以跳过本节。
 
-## 许可证与参考
+- Bridge 协议：[`docs/protocol.md`](docs/protocol.md)
+- AIUI 客户端源码：[rokid_aiui_astrbot_client](https://github.com/Xhan258/rokid_aiui_astrbot_client)
+- 扩展 AIUI 能力时，请同步更新 `app.json` 权限、`config.js` 说明和 README。
 
-MIT License，见 [`LICENSE`](LICENSE)。
+## 版本兼容
 
-项目独立实现；`rokid-glasses-desktop-agent`、`claude-bridge-glasses` 与 `rokid-personal-ai` 只作为配对和分层设计参考，未复制其代码。
+| 组件 | 版本 |
+| --- | --- |
+| AstrBot Rokid Bridge | `0.3.2` |
+| Rokid AIUI AstrBot Client | `1.0.0` |
+
+## License
+
+MIT License

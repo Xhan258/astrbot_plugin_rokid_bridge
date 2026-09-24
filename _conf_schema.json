@@ -5,10 +5,10 @@
     "default": "0.0.0.0"
   },
   "listen_port": {
-    "description": "Bridge 监听端口",
+    "description": "眼镜连接端口（可自定义）",
     "type": "int",
     "default": 6191,
-    "hint": "眼镜通过此端口连接。插件不会自动开放公网。"
+    "hint": "默认 6191。可改为未被占用的端口；修改后需重载插件，并在 AIUI 客户端 serverUrl 中填写相同端口。Docker 部署还需映射该端口。"
   },
   "allow_pairing": {
     "description": "允许新设备申请配对",
@@ -29,6 +29,6 @@
     "description": "普通分段回复结束等待（毫秒）",
     "type": "int",
     "default": 3000,
-    "hint": "QQ/微信式多段回复在这段空闲时间后才结束，避免眼镜只收到第一段。"
+    "hint": "每个分段都会立即显示；最后一个分段后等待这段时间再结束回复。若后续分段间隔较长，可适当调大。"
   }
 }
