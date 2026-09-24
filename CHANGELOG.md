@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- 将 AIUI 客户端源码迁移至独立仓库 `rokid_aiui_astrbot_client`，使灵珠 AIUI Studio 可直接从仓库根目录导入。
+- 插件 Release ZIP 仅保留 AstrBot Bridge 运行所需文件，不再携带 AIUI 客户端。
+
 ## 0.3.0
 
 - 将 AIUI 客户端源码纳入仓库的 `aiui-client/`，可直接从 GitHub 或本地导入 AIUI Studio。
