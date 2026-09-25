@@ -153,8 +153,15 @@ class RokidGlassesBridgePlugin(Star):
             return "权限不足：当前眼镜设备未设为管理员，不能使用设备工具。"
         return None
 
+    def _hud_display_seconds(self) -> int:
+        try:
+            configured = int(self.config.get("hud_display_seconds", 8))
+        except (TypeError, ValueError):
+            configured = 8
+        return max(1, min(configured, 30))
+
     @llm_tool("rokid_show_text")
-    async def rokid_show_text(self, event, text: str, duration_seconds: int = 8) -> str:
+    async def rokid_show_text(self, event, text: str, duration_seconds: int = 0) -> str:
         """在当前管理员 Rokid 眼镜的 HUD 上显示一段临时文本。
 
         仅在用户正通过该眼镜聊天、且确实需要在视野中显示简短结果时调用。
@@ -166,9 +173,10 @@ class RokidGlassesBridgePlugin(Star):
         if not text:
             return "显示失败：文本不能为空。"
         try:
-            duration = max(1, min(int(duration_seconds), 30))
+            requested_duration = int(duration_seconds)
         except (TypeError, ValueError):
-            duration = 8
+            requested_duration = 0
+        duration = self._hud_display_seconds() if requested_duration <= 0 else max(1, min(requested_duration, 30))
         result = await self.adapter.request_device_command(
             event._request_id,
             "show_text",
