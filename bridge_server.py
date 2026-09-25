@@ -58,23 +58,14 @@ class BridgeServer:
     async def command_result(self, request):
         try:
             if request.content_type.startswith("multipart/"):
-                form = await request.post()
-                image = form.get("image")
-                image_bytes, mime_type = b"", ""
-                if image is not None:
-                    image_bytes = image.file.read()
-                    mime_type = str(getattr(image, "content_type", "") or "")
-                    if not mime_type.startswith("image/"):
-                        raise BridgeProtocolError(400, "照片必须是图片格式")
-                    if not image_bytes or len(image_bytes) > 8 * 1024 * 1024:
-                        raise BridgeProtocolError(400, "照片大小必须在 1 到 8 MiB 之间")
+                fields, image_bytes, mime_type = await self.read_multipart_result(request)
                 payload = {
-                    "protocol_version": int(form.get("protocol_version", 0)),
-                    "device_id": str(form.get("device_id", "")),
-                    "credential": str(form.get("credential", "")),
-                    "command_id": str(form.get("command_id", "")),
-                    "status": str(form.get("status", "error")),
-                    "message": str(form.get("message", "")),
+                    "protocol_version": int(fields.get("protocol_version", 0)),
+                    "device_id": str(fields.get("device_id", "")),
+                    "credential": str(fields.get("credential", "")),
+                    "command_id": str(fields.get("command_id", "")),
+                    "status": str(fields.get("status", "error")),
+                    "message": str(fields.get("message", "")),
                     "image_bytes": image_bytes,
                     "mime_type": mime_type,
                 }
@@ -93,6 +84,31 @@ class BridgeServer:
         except Exception:
             return self.error("设备命令结果格式无效", 400)
         return self.json({"protocol_version": 1, "status": "ok"})
+
+    @staticmethod
+    async def read_multipart_result(request) -> tuple[dict[str, str], bytes, str]:
+        """Read a command-result upload without synchronously blocking aiohttp."""
+        fields: dict[str, str] = {}
+        image_bytes, mime_type = b"", ""
+        reader = await request.multipart()
+        while part := await reader.next():
+            if part.name != "image":
+                fields[str(part.name or "")] = await part.text()
+                continue
+            mime_type = str(part.headers.get("Content-Type", "") or "")
+            if not mime_type.startswith("image/"):
+                raise BridgeProtocolError(400, "照片必须是图片格式")
+            chunks: list[bytes] = []
+            size = 0
+            while chunk := await part.read_chunk(64 * 1024):
+                size += len(chunk)
+                if size > 8 * 1024 * 1024:
+                    raise BridgeProtocolError(400, "照片大小必须在 1 到 8 MiB 之间")
+                chunks.append(chunk)
+            image_bytes = b"".join(chunks)
+            if not image_bytes:
+                raise BridgeProtocolError(400, "照片大小必须在 1 到 8 MiB 之间")
+        return fields, image_bytes, mime_type
 
     async def payload(self, request):
         try: data = await request.json()

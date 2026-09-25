@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import os
 import tempfile
 
-from astrbot.api import llm_tool
+from astrbot.api import llm_tool, logger
 from astrbot.api.star import Context, Star
 from astrbot.api.web import error_response, json_response, request
 
@@ -14,9 +13,6 @@ from .rokid_adapter import RokidPlatformAdapter
 from .rokid_event import RokidPlatformEvent
 from .services.device_registry import DeviceRegistry
 from .services.runtime import set_registry
-
-logger = logging.getLogger(__name__)
-
 
 class RokidGlassesBridgePlugin(Star):
     """Bootstraps shared device storage and authenticated WebUI management APIs."""
