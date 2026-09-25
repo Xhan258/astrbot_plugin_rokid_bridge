@@ -9,7 +9,7 @@
 - AIUI 客户端仓库：[rokid_aiui_astrbot_client](https://github.com/Xhan258/rokid_aiui_astrbot_client)
 - AIUI Studio 网页端：[https://aiui.rokid.com/](https://aiui.rokid.com/)
 
-当前版本：`0.3.6`
+当前版本：`0.3.7`
 
 ## 你会得到什么
 
@@ -308,8 +308,8 @@ serverUrl: 'http://主机IP:端口',
 
 | 组件 | 版本 |
 | --- | --- |
-| AstrBot Rokid Bridge | `0.3.6` |
-| Rokid AIUI AstrBot Client | `1.0.1` |
+| AstrBot Rokid Bridge | `0.3.7` |
+| Rokid AIUI AstrBot Client | `1.0.5` |
 
 ## License
 

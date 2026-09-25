@@ -4,7 +4,7 @@ short_desc: 让 Rokid 眼镜通过 AIUI 客户端连接 AstrBot。
 desc: |
   提供眼镜六码配对、设备管理、逐段回复显示、管理员权限、页面内 HUD 提示与拍照识图工具。
   眼镜消息由 AstrBot 正常处理，可使用部署者已有的模型、人格、记忆和工具。
-version: 0.3.6
+version: 0.3.7
 author: Xhan258
 repo: https://github.com/Xhan258/astrbot_plugin_rokid_bridge
 astrbot_version: ">=4.27,<5"
