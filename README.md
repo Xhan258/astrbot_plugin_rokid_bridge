@@ -105,6 +105,8 @@ AIUI Studio 是 Rokid 的网页端 AIUI 开发和构建平台：
 
 导入后，在 AIUI Studio 的“代码”页签打开根目录 `config.js`。
 
+想快速使用时，只需要修改 `serverUrl`，把 `http://YOUR_ASTRBOT_HOST:6191` 换成你的 Bridge 地址；其余配置保持默认即可。
+
 ```js
 export const config = {
   serverUrl: 'http://YOUR_ASTRBOT_HOST:6191',
