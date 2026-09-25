@@ -25,6 +25,12 @@
     "type": "int",
     "default": 120
   },
+  "force_streaming_for_rokid": {
+    "description": "眼镜消息强制流式输出",
+    "type": "bool",
+    "default": true,
+    "hint": "仅影响 Rokid 眼镜消息，不影响 QQ、微信等其他平台。建议保持开启：AstrBot 4.27 的非流式 Agent 路径可能无法把最终回复交回眼镜。关闭后，眼镜将跟随 AstrBot 全局“流式输出”设置。"
+  },
   "segment_close_delay_milliseconds": {
     "description": "普通分段回复结束等待（毫秒）",
     "type": "int",

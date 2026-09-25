@@ -29,6 +29,9 @@ class RokidGlassesBridgePlugin(Star):
             {
                 "id": "rokid_bridge_internal",
                 "request_timeout_seconds": self.config.get("request_timeout_seconds", 120),
+                "force_streaming_for_rokid": bool(
+                    self.config.get("force_streaming_for_rokid", True)
+                ),
                 "segment_close_delay_seconds": max(
                     100,
                     int(self.config.get("segment_close_delay_milliseconds", 3000)),

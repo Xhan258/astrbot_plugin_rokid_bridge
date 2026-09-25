@@ -67,6 +67,11 @@ class RokidPlatformAdapter(Platform):
         message.message_str, message.message = text.strip(), [Plain(text=text.strip())]
         message.raw_message = {"protocol_version": 1, "device_id": device.device_id}
         event = RokidPlatformEvent(message.message_str, message, self.meta(), device.device_id, self, request_id)
+        # AstrBot 4.27's non-streaming internal Agent path may consume a reply
+        # without returning it to the platform. Keep this scoped to Rokid so
+        # global streaming preferences and other message platforms are untouched.
+        if self.config.get("force_streaming_for_rokid", True):
+            event.set_extra("enable_streaming", True)
         # AstrBot permission filters inspect event.role. The setting is bound to
         # the authenticated device record, not a display name or mutable client data.
         event.role = "admin" if device.is_admin else "member"
