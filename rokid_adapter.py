@@ -123,7 +123,7 @@ class RokidPlatformAdapter(Platform):
         started = time.monotonic()
         try:
             yield self._sse("ready", {"protocol_version": 1, "request_id": request_id})
-            while remaining := timeout - (time.monotonic() - started):
+            while (remaining := timeout - (time.monotonic() - started)) > 0:
                 try:
                     # Some embedded SSE clients close an otherwise healthy stream after
                     # about five seconds without a body chunk. Keep the connection alive
